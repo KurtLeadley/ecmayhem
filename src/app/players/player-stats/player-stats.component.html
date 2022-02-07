@@ -1,0 +1,55 @@
+<div class="component-container">
+  <h1>Player Statistics</h1>
+  <div id="player-dds">
+    <select class= "dropdown"
+      (change)="getSelectedStats()"
+      [(ngModel)]="selectedSeason">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'  |  slice:1"
+        [value]="season"
+        [selected]="season == currentSeason">
+        {{season}}
+      </option>
+    </select>
+    <select class = "dropdown"
+      (change)="getSelectedStats()"
+      [(ngModel)]="selectedTeam">
+      <option
+        *ngFor="let team of availableTeams | sort:'desc':'season'"
+        [value]="team._id"
+        [selected]="team._id == 'All'">
+        {{team.name}}
+      </option>
+    </select>
+    <button (click) = "restoreDefaults()">Reset</button>
+  </div>
+  <table multi="true" *ngIf="players.length > 0">
+    <tr>
+      <th *ngIf= showSeasonsTable>Season</th>
+      <th>First</th>
+      <th>Last</th>
+      <th>Number</th>
+      <th>Team</th>
+      <th>Position</th>
+      <th>Goals</th>
+      <th>Assists</th>
+      <th>Points</th>
+      <th>PIM</th>
+    </tr>
+    <tr *ngFor="let player of players" (click)="filterPlayer(player)" >
+      <td *ngIf= showSeasonsTable>{{player.stats.season}}</td>
+      <td>{{player.first}}</td>
+      <td>{{player.last}}</td>
+      <td>{{player.stats.jersey}}</td>
+      <td>{{player.stats.team.name}}</td>
+      <td>{{player.stats.position}}</td>
+      <td>{{player.stats.goals}}</td>
+      <td>{{player.stats.assists}}</td>
+      <td>{{player.stats.points}}</td>
+      <td>{{player.stats.pim}}</td>
+    </tr>
+  </table>
+  <p class="info-text mat-body-1" *ngIf="players.length <= 0">No Statistics Available</p>
+</div>
+

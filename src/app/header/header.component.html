@@ -1,0 +1,16 @@
+<div class="topnav" id="myTopnav">
+  <a routerLink="/">Home</a>
+  <div class="dropdown">
+    <button class="dropbtn">Players
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a routerLink="/players/player-stats">Player Stats</a>
+      <a routerLink="/players/goalie-stats">Goalie Stats</a>
+      <a routerLink="/players/player-admin">Player Admin</a>
+    </div>
+  </div>
+  <a routerLink="/standings">Standings</a>
+  <a routerLink="/schedule">Schedule</a>
+  <a href="javascript:void(0);" class="icon" (click)="dropDown()">&#9776;</a>
+</div>

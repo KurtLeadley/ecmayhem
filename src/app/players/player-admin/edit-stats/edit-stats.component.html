@@ -1,0 +1,103 @@
+<div class="component-container">
+  <h2>Edit Player Stats</h2>
+  <p><i>Search by last name</i></p>
+  <div class="form-group">
+    <input type="text"
+      id="search-text"
+      [(ngModel)]="searchText"
+      placeholder="Search Players..."
+      (keyup)="applyFilter($event.target.value); hideStatsForm()" #filterInput
+      autofocus/>
+    <button (click) = "reset()">Reset</button>
+    <ul class="list-group list-group-flush " *ngIf="filterInput.value.length > 1">
+      <li (click) = "selectPlayer(player); hideStatsForm()" class="list-group-item" *ngFor="let player of players | appFilter: searchText">
+        {{player.first}} {{player.last}}: {{player.email}}
+      </li>
+    </ul>
+  </div>
+  <!-- A Player is Selected -->
+  <div *ngIf ="selectedPlayer">
+    <!-- Stats Exist For Selected Player -->
+    <div *ngIf= "selectedPlayerArray.length > 0 &&  !isShowStatsForm">
+      <h3>{{this.selectedPlayer.first}} {{selectedPlayer.last}}'s Statistics:</h3>
+      <table>
+        <tr>
+          <th>Season</th>
+          <th>Jersey</th>
+          <th>Positon</th>
+          <th>Team</th>
+          <th>Goals</th>
+          <th>Assists</th>
+          <th>Points</th>
+          <th>PIM</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+        <tr *ngFor ="let player of selectedPlayerArray">
+          <td>{{player.stats.season}}</td>
+          <td>{{player.stats.jersey}}</td>
+          <td>{{player.stats.position}}</td>
+          <td>{{player.stats.team.name}}</td>
+          <td>{{player.stats.goals}}</td>
+          <td>{{player.stats.assists}}</td>
+          <td>{{player.stats.points}}</td>
+          <td>{{player.stats.pim}}</td>
+          <td class="center-td" (click) = "showStatsForm(false,player.stats)"><i class="fas fa-pencil-alt"></i></td>
+          <td class="center-td" (click) = "deletePlayerStats(player.id,player.stats._id)"><i class="fas fa-trash"></i></td>
+        </tr>
+      </table>
+      <button (click) = "showStatsForm(true, null, null)">Add Statistics</button>
+    </div>
+    <div>
+      <!-- No Stats Exist For Selected Player -->
+      <div *ngIf = "selectedPlayerArray.length == 0 && !isShowStatsForm">
+        <h3>{{this.selectedPlayer.first}} {{selectedPlayer.last}}'s Statistics:</h3>
+        <p><i>No existing statistics found.</i></p>
+        <button (click) = "showStatsForm(true, null, null)">Add Statistics</button>
+      </div>
+      <!-- Add/Edit statsForm -->
+      <div class="two-col" *ngIf= "isShowStatsForm">
+        <div class ="col-right">
+          <h3>Add Statistics:</h3>
+          <form
+            [formGroup] = "statsForm"
+            (ngSubmit) = "onSubmit()"
+            class="two-col">
+            <div class="col-left">
+              <label>Season:</label>
+              <select formControlName="season">
+                <option *ngIf ="isCreatePlayerStats" value="null" disabled >Select</option>
+                <option *ngFor = "let season of availableSeasons" [value] = "season">{{season}}</option>
+              </select>
+              <label>Jersey:</label>
+              <input type="number" formControlName="jersey" [ngValue] = "statsForm.jersey">
+              <label>Position:</label>
+              <select formControlName="position">
+                <option *ngIf ="isCreatePlayerStats" value="null" disabled >Select</option>
+                <option *ngFor = "let position of positions" [value] = "position">{{position}}</option>
+              </select>
+              <label>Team:</label>
+              <select formControlName="teamId">
+                <option *ngIf ="isCreatePlayerStats" value="null" disabled >Select</option>
+                <option *ngFor = "let team of availableTeams" [value] = "team._id">{{team.name}}</option>
+              </select>
+            </div>
+            <div class="col-right">
+              <label>Goals:</label>
+              <input type="number" formControlName="goals" [ngValue] = "statsForm.goals">
+              <label>Assists:</label>
+              <input type="number" formControlName="assists" [ngValue] = "statsForm.assists">
+              <label>PIM:</label>
+              <input type="number" formControlName="pim" [ngValue] = "statsForm.pim">
+            </div>
+            <!-- <button class="submit-form-btn" type="submit" [disabled]="!statsForm.valid">Submit</button> -->
+            <button class="submit-form-btn" type="submit" >Submit</button>
+            <button class="submit-form-btn" (click) = "hideStatsForm()">Cancel</button>
+          </form>
+
+          <p class="error" *ngIf="isDuplicateSeasonErrorMessage">Statistics for selected season already exist for this player</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

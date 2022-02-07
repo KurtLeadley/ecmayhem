@@ -1,0 +1,82 @@
+
+<div class="component-container">
+  <div class="top two-col" *ngIf ="!csvSubmitted">
+    <div class="col-left">
+      <h2>Import Players:</h2>
+      <hr />
+      <input type="file" class="upload" (change)="uploadChangeListener($event.target.files)">
+      <div *ngIf="csvPlayers.length > 0">
+        <h2>Players to Import:</h2>
+        <hr />
+        <table>
+          <tr>
+            <th>First</th>
+            <th>Last</th>
+            <th>Email</th>
+          </tr>
+          <tr *ngFor="let player of csvPlayers">
+            <td>{{player.First}}</td>
+            <td>{{player.Last}}</td>
+            <td>{{player.Email}}</td>
+          </tr>
+        </table>
+        <button (click)="onImport()">Import</button>
+      </div>
+    </div>
+    <div class="col-right directions">
+      <h2>Directions:</h2>
+      <hr />
+      <ul>
+        <li>Must be a csv file</li>
+        <li>First row must be the headers:</li>
+        <ul>
+          <li>First</li>
+          <li>Last</li>
+          <li>Email</li>
+        </ul>
+        <li>Subsequent rows are the actual data</li>
+        <li>Do not have any other columns of data</li>
+      </ul>
+      <img class="image" src="../../../../assets/images/import-player-directions.png" height="100px">
+    </div>
+  </div>
+  <div class="bottom two-col" *ngIf="csvSubmitted">
+    <div>
+      <h2>Results:</h2>
+      <div *ngIf="imported.length > 0">
+        <hr/>
+        <h3>Imported:</h3>
+        <table>
+          <tr>
+            <th>First</th>
+            <th>Last</th>
+            <th>Email</th>
+          </tr>
+          <tr *ngFor="let player of imported">
+            <td>{{player.first}}</td>
+            <td>{{player.last}}</td>
+            <td>{{player.email}}</td>
+          </tr>
+        </table>
+      </div>
+      <div *ngIf="notImported.length > 0">
+        <hr/>
+        <h3>Not Imported:</h3>
+        <table>
+          <tr>
+            <th>First</th>
+            <th>Last</th>
+            <th>Email</th>
+          </tr>
+          <tr *ngFor="let player of notImported">
+            <td>{{player.first}}</td>
+            <td>{{player.last}}</td>
+            <td>{{player.email}}</td>
+          </tr>
+        </table>
+      </div>
+      <button (click)="reset()">Back</button>
+    </div>
+  </div>
+</div>
+

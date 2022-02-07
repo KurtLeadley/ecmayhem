@@ -1,0 +1,47 @@
+<div class="component-container">
+  <h1>Standings</h1>
+  <div id="player-dds">
+    <select class= "dropdown"
+      (change)="getSelectedStandings(selectedSeason)"
+      [(ngModel)]="selectedSeason">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'"
+        [value]="season"
+        [selected]="season == currentSeason">
+        {{season}}
+      </option>
+    </select>
+    <button (click) = "restoreDefaults()">Reset</button>
+  </div>
+  <div *ngIf = "!seasonStatsExists">
+    <p>No statistics for selected season</p>
+  </div>
+  <div *ngIf = "seasonStatsExists">
+    <table multi="true">
+      <tr>
+        <th>Team</th>
+        <th>GP</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Otl</th>
+        <th>Pts</th>
+        <th>GF</th>
+        <th>GA</th>
+        <th>+/-</th>
+      </tr>
+      <tr *ngFor="let team of teams">
+        <td>{{team.name}}</td>
+        <td>{{team.stats.gp}}</td>
+        <td>{{team.stats.wins}}</td>
+        <td>{{team.stats.losses}}</td>
+        <td>{{team.stats.otl}}</td>
+        <td>{{team.stats.pts}}</td>
+        <td>{{team.stats.gf}}</td>
+        <td>{{team.stats.ga}}</td>
+        <td>{{team.stats.gd}}</td>
+      </tr>
+    </table>
+  </div>
+
+
