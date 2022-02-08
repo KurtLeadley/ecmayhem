@@ -6,6 +6,7 @@ const statRoutes = require("./routes/stats-router");
 const playerRoutes = require("./routes/players-routes");
 const standingsRoutes = require("./routes/standings-routes");
 const teamRoutes = require("./routes/team-routes");
+require('dotenv').config();
 // create our express application
 const app = express();
 // express middleware for handling json data
@@ -14,7 +15,7 @@ app.use(express.urlencoded({
   extended: true
 }));
 // Connect to mongoDb "ecmayhem"
-mongoose.connect("mongodb+srv://kurt:Sunset1212!@ecmayhem.8kfkj.mongodb.net/ecmayhem?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://"+process.env.DB_USER+":" +process.env.DB_PASS+"@ecmayhem.8kfkj.mongodb.net/ecmayhem?retryWrites=true&w=majority")
   .then(() => {
     console.log("Connected to database!");
   })
