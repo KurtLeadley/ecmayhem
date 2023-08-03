@@ -58,6 +58,7 @@ export class GoalieStatsComponent implements OnInit, OnDestroy {
       console.log(res);
       res.data.push("All");
       this.availableSeasons = res.data;
+      console.log(this.availableSeasons);
     });
     try {
       const teams = await this.TeamService.get().toPromise();
