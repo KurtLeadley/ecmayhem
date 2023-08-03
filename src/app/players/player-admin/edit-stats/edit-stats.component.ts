@@ -6,7 +6,6 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { Subscription } from 'rxjs';
 import { PlayerService } from 'src/app/services/player.service';
 import { StatsService } from '../../../services/stats.service';
-import { StandingsService } from '../../../services/standings.service';
 import { TeamService } from '../../../services/team.service';
 import { Player } from '../../../models/player.model';
 /////////////////////////////////////////////////////////////////////
@@ -25,7 +24,6 @@ export class EditStatsComponent implements OnInit {
     private formBuilder: FormBuilder,
     public PlayerService: PlayerService,
     public StatsService: StatsService,
-    public StandingsService: StandingsService,
     public TeamService: TeamService
   ) { };
   /////////////////////////////////////////////////////////////////////
@@ -43,6 +41,7 @@ export class EditStatsComponent implements OnInit {
   isShowStatsForm: Boolean;
   isShowAddStatisticsButton: Boolean;
   isDuplicateSeasonErrorMessage : Boolean;
+  isMissingTeamSeasonErrorMessage : Boolean;
   isCreatePlayerStats: Boolean;
   /////////////////////////////////////////////////////////////////////
   /////////////////////  Initialization  //////////////////////////////
@@ -53,6 +52,7 @@ export class EditStatsComponent implements OnInit {
     this.isCreatePlayerStats = false;
     this.isShowAddStatisticsButton = true;
     this.isDuplicateSeasonErrorMessage = false;
+    this.isMissingTeamSeasonErrorMessage = false;
     this.positions = ["C","RW","LW","D"];
     this.selectedPlayerArray = [];
     this.searchText = "";
@@ -77,13 +77,13 @@ export class EditStatsComponent implements OnInit {
       console.log(this.players);
     });
     // get available seasons to select from
-    this.StandingsService.get("seasons").subscribe((res : any) => {
+    this.TeamService.getAvailableSeasons().subscribe((res : any) => {
       console.log("Seasons:");
       console.log(res.data);
       this.availableSeasons = res.data;
     });
     // get available teams to select from
-    this.StandingsService.get("teams").subscribe((res : any) => {
+    this.TeamService.get().subscribe((res : any) => {
       console.log("Teams:");
       console.log(res.data);
       this.availableTeams = res.data;
@@ -124,12 +124,16 @@ export class EditStatsComponent implements OnInit {
       console.log("Create Stats Form Mode");
       this.statsForm.reset();
       this.statsForm.get('season').enable();
+      this.statsForm.get('team').enable();
+      this.statsForm.get('teamId').enable();
       this.isShowStatsForm = true;
     } else {
       console.log("Edit Stats Form Mode");
       console.log(stats);
       //console.log(stats.team);
       this.statsForm.get('season').disable();
+      this.statsForm.get('team').disable();
+      this.statsForm.get('teamId').disable();
       this.statsForm.setValue({
         _id : stats._id,
         season: stats.season,
@@ -156,6 +160,7 @@ export class EditStatsComponent implements OnInit {
     this.isShowStatsForm = false;
     this.isShowAddStatisticsButton = true;
     this.isDuplicateSeasonErrorMessage = false;
+    this.isMissingTeamSeasonErrorMessage = false;
     this.isCreatePlayerStats = false;
   };
   // Submit new or edited stats button clicked
@@ -205,15 +210,25 @@ export class EditStatsComponent implements OnInit {
     if (seasonIndex == -1) {
       this.isDuplicateSeasonErrorMessage = false;
       this.StatsService.createStats(this.statsForm.value).subscribe((res : any) => {
-        // return the sub-documents _id so that we can edit and delete without refreshing
-        newStatsObject.stats._id = res.document.statId;
-        newStatsObject.stats.team._id = res.document.teamId;
-        newStatsObject.stats.team.name= res.document.teamName;
-        this.selectedPlayerArray.push(newStatsObject);
-        console.log(this.selectedPlayerArray);
-        this.isShowStatsForm = false;
-        this.TeamService.addPlayer(newStatsObject,res.document.teamId).subscribe((res:any) => {
-
+        console.log(res);
+        newStatsObject.stats._id = res.data.stats[0]._id;
+        newStatsObject.stats.team._id = res.data.stats[0].team;
+        let playerId = res.data._id;
+        let statId = res.data.stats[0]._id;
+        this.TeamService.addPlayer(newStatsObject).subscribe((res:any) => {
+          if (res.data) {
+            console.log("Player Added To Team:");
+            console.log(res);
+            // return the sub-datas _id so that we can edit and delete without refreshing
+            newStatsObject.stats.team.name= res.data.name;
+            this.selectedPlayerArray.push(newStatsObject);
+            console.log(this.selectedPlayerArray);
+            this.isShowStatsForm = false;
+            this.isMissingTeamSeasonErrorMessage = false;
+          } else {
+            this.StatsService.deletePlayerStats(playerId,statId);
+            this.isMissingTeamSeasonErrorMessage = true;
+          }
         });
       });
     } else {

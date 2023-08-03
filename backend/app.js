@@ -1,19 +1,20 @@
 // import dependencies
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 // require our route definitions
 const statRoutes = require("./routes/stats-router");
 const playerRoutes = require("./routes/players-routes");
-const standingsRoutes = require("./routes/standings-routes");
 const teamRoutes = require("./routes/team-routes");
+const scheduleRoutes = require("./routes/schedule-routes");
+const gameRoutes = require("./routes/games-routes");
+
 require('dotenv').config();
 // create our express application
 const app = express();
 // express middleware for handling json data
-app.use(express.json());
-app.use(express.urlencoded({
-  extended: true
-}));
+app.use(express.json({limit: '100mb'}));
+app.use(express.urlencoded({limit: '100mb', extended: true, parameterLimit: 50000}));
 // Connect to mongoDb "ecmayhem"
 mongoose.connect("mongodb+srv://"+process.env.DB_USER+":" +process.env.DB_PASS+"@ecmayhem.8kfkj.mongodb.net/ecmayhem?retryWrites=true&w=majority")
   .then(() => {
@@ -38,7 +39,8 @@ app.use((req, res, next) => {
 // apply routes
 app.use("/api/players", playerRoutes);
 app.use("/api/statistics", statRoutes);
-app.use("/api/standings", standingsRoutes);
-app.use('/api/team', teamRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/schedule', scheduleRoutes);
+app.use('/api/games', gameRoutes);
 // export app
 module.exports = app;

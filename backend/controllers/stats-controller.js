@@ -3,6 +3,7 @@
 ; Description: CRUD Controller for Stats HTTP requests
 ***************************************************************/
 const mongoose = require('mongoose');
+mongoose.Promise = Promise;
 // allow for matching on _id in aggregate db functions
 const ObjectId = mongoose.Types.ObjectId;
 // Document Object model to query in MongoDB
@@ -13,100 +14,49 @@ const Team = require('../models/team');
 // CREATE
 exports.insertPlayerStats = (req,res) => {
   let stats = req.body;
-  //console.log(stats);
+  // console.log(stats);
   // remove angular ids from body, they get handled by mongoose automatically
-  delete stats.id;
+  // delete stats.id;
   delete stats._id;
   stats.team = stats.teamId;
-  delete stats.teamId;
-  const filter = {"_id": req.params.player};
-  const update = {$push : {stats:stats}};
-  // return newest obj in stats only
-  const options = {new: true, "fields":  { "stats": { "$slice": -1 } }};
-  Player.findOneAndUpdate(filter,update,options).populate({
-    path: "stats",
-    populate: {
-      path : "team",
-      model : Team,
-      select: {_id:1,name:1}
-    }
-  }).exec(function(err,document) {
-    if (err) {
-      console.log(err);
-    } else {
-      //console.log(document.stats[0]);
-      returnObj = {
-        statId : document.stats[0]._id,
-        teamName : document.stats[0].team.name,
-        teamId : document.stats[0].team._id
-      };
-      // console.log(returnObj);
-      res.status(200).json({
-        document : returnObj
-      });
-    }
+  // delete stats.teamId;
+  // console.log(stats);
+  const filterPlayer = {"_id": req.params.player};
+  const updatePlayer = {$push : {stats:stats}};
+  // return newest obj in stats only (slice grabs last one)
+  const optionsPlayer = {new: true, "fields":  { "stats": { "$slice": -1 } }};
+
+  Player.findOneAndUpdate(filterPlayer,updatePlayer,optionsPlayer).exec().then(result => {
+    res.status(200).json({
+      message: "Player Stats Created",
+      data : result
+    });
   });
 };
 // READ
-exports.getStats = (req,res) => {
-  //console.log(req.params);
-  if (req.params.team != "All" && req.params.player == "All") {
-    let pipeline = [
-      {$unwind:"$stats"},
-      {$project:{first:1,last:1,email:1,stats:1}},
-      {$addFields:{"stats.points":{$add:[ "$stats.goals", "$stats.assists" ]}}},
-      {$match:{
-        "$and" : [
-          {"stats.season":req.params.season},
-          {"stats.team":req.params.team}
-        ]}
-      },
-      {$sort:{"stats.points":-1}}
-    ];
-    let query = Player.aggregate(pipeline);
-    let promise = query.exec();
-    promise.then(documents => {
-      res.status(200).json({
-        message: "Players Fetched Successfully",
-        players : documents
-      });
+exports.getStats = async (req,res) => {
+  console.log(req.body);
+  let pipeline = [
+    {$unwind:"$stats"},
+    {"$lookup": {
+      "from": "teams",
+      "localField": "stats.team",
+      "foreignField": "stats._id",
+      "as": "team"
+    }},
+    {$project:{first:1,last:1,email:1,stats:1, team:1}},
+    {$addFields:{"stats.points":{$add:[ "$stats.goals", "$stats.assists" ]}}},
+    {$sort:{"stats.points":-1}}
+  ];
+  try {
+    let result = await Player.aggregate(pipeline).exec();
+    return res.status(200).json({
+      message: "Players Stats Fetched Successfully",
+      data : result
     });
-  }
-  if (req.params.team == "All" && req.params.player == "All") {
-    let pipeline = [
-      {$unwind:"$stats"},
-      {$project:{first:1,last:1,email:1,stats:1}},
-      {$addFields:{"stats.points":{$add:[ "$stats.goals", "$stats.assists" ]}}},
-      {$match:{"stats.season":req.params.season}},
-      {$sort:{"stats.points":-1}}
-    ];
-    let query = Player.aggregate(pipeline);
-    let promise = query.exec();
-    promise.then(documents => {
-      res.status(200).json({
-        message: "Players Fetched Successfully",
-        players : documents
-      });
-    });
-  }
-  // get single player stats
-  if (req.params.player != "All") {
-    //console.log("Get Player");
-    let pipeline = [
-      {$unwind:"$stats"},
-      {$project:{first:1,last:1,email:1,stats:1}},
-      {$addFields:{"stats.points":{$add:[ "$stats.goals", "$stats.assists" ]}}},
-      {$match:{"_id": ObjectId(req.params.player)}},
-      {$sort:{"stats.season":-1}}
-    ];
-    let query = Player.aggregate(pipeline);
-    let promise = query.exec();
-    promise.then(documents => {
-      //console.log(documents);
-      res.status(200).json({
-        message: "Player Fetched Successfully",
-        players : documents
-      });
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message
     });
   }
 };
@@ -125,7 +75,7 @@ exports.getSinglePlayerStats = (req, res) => {
   promise.then(documents => {
     res.status(200).json({
       message: "Player Fetched Successfully",
-      player : documents
+      data : documents
     });
   });
 };
@@ -154,6 +104,40 @@ exports.updateStats = (req,res) => {
     }
   });
 };
+exports.updateManyStats = async (req, res) => {
+  console.log("updateManyStats API");
+  // console.log(req.body.season);
+  // console.log(req.body.stats);
+  const docs = req.body.stats;
+  const bulkOps = docs.map(doc => ({
+    updateOne: {
+      filter: {"email": doc.email, "stats.season" : req.body.season},
+      update:
+      {
+        $set: {
+          "stats.$.goals" : doc.goals,
+          "stats.$.assists" : doc.assists,
+          "stats.$.pim" : doc.pim,
+          "stats.$.shotsFaced" : doc.shotsFaced,
+          "stats.$.goalsAgainst" : doc.goalsAgainst
+        }
+      }
+    }
+  }));
+  //console.log(bulkOps);
+  try {
+    let result = await Player.bulkWrite(bulkOps);
+    console.log(result);
+    return res.status(200).json({
+      message: "Players Updated Successfully",
+      data : result
+    });
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message
+    });
+  }
+};
 // DELETE
 exports.deletePlayerStats = (req,res) => {
   //console.log(req.params);
@@ -163,7 +147,7 @@ exports.deletePlayerStats = (req,res) => {
   ).then(documents => {
     res.status(204).json({
       message: "Player Stats Deleted Successfully",
-      documents: documents
+      data: documents
     });
   });
 };
@@ -172,7 +156,7 @@ exports.getSeasons = (req,res,next) => {
   Player.distinct('stats.season').then(documents => {
     res.status(200).json({
       message: "Available Seasons Fetched Successfully",
-      seasons : documents
+      data : documents
     });
   });
 };

@@ -10,6 +10,10 @@ import { ImportStatsComponent } from './players/player-admin/import-stats/import
 import { EditStatsComponent } from './players/player-admin/edit-stats/edit-stats.component';
 import { ImportPlayersComponent } from './players/player-admin/import-players/import-players.component';
 import { CreatePlayerComponent } from './players/player-admin/create-player/create-player.component';
+import { ResultsAdminComponent } from './schedule/results-admin/results-admin.component';
+import { CreateAdminComponent } from './schedule/create-admin/create-admin.component';
+import { ViewScheduleComponent } from './schedule/view-schedule/view-schedule.component';
+import { LoginComponent } from './auth/login/login.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -24,7 +28,11 @@ const routes: Routes = [
       { path: 'import-stats', component: ImportStatsComponent},
     ]},
   { path: 'standings' , component: StandingsComponent },
-  { path: 'schedule', component: ScheduleComponent }
+  { path: 'schedule', component: ScheduleComponent },
+  { path: 'schedule/results-admin', component: ResultsAdminComponent },
+  { path: 'schedule/create-admin', component: CreateAdminComponent },
+  { path: 'schedule/view', component: ViewScheduleComponent },
+  { path: 'login', component: LoginComponent}
 ];
 
 @NgModule({

@@ -58,7 +58,7 @@
       <!-- Add/Edit statsForm -->
       <div class="two-col" *ngIf= "isShowStatsForm">
         <div class ="col-right">
-          <h3>Add Statistics:</h3>
+          <h3> Create / Update {{this.selectedPlayer.first}} {{selectedPlayer.last}}'s Statistics:</h3>
           <form
             [formGroup] = "statsForm"
             (ngSubmit) = "onSubmit()"
@@ -94,7 +94,7 @@
             <button class="submit-form-btn" type="submit" >Submit</button>
             <button class="submit-form-btn" (click) = "hideStatsForm()">Cancel</button>
           </form>
-
+          <p class="error" *ngIf="isMissingTeamSeasonErrorMessage">Team not registered for this season</p>
           <p class="error" *ngIf="isDuplicateSeasonErrorMessage">Statistics for selected season already exist for this player</p>
         </div>
       </div>

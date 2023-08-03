@@ -8,9 +8,10 @@ const router = app.Router();
 router.get('/player/:player', StatsController.getSinglePlayerStats);
 router.put('/player/:player', StatsController.insertPlayerStats);
 router.put('/player/:playerId/:statsId', StatsController.updateStats);
+router.put('/players', StatsController.updateManyStats);
 router.delete('/player/:playerId/:statsId', StatsController.deletePlayerStats);
 // Get cumulative Stats for season / team / player
-router.get('/players/:season/:team/:player', StatsController.getStats );
+router.get('/players', StatsController.getStats );
 // get available seasons and teams
 router.get('/seasons', StatsController.getSeasons);
 // export router

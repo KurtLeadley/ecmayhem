@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs';
 
 import { Player } from "../../models/player.model";
 import { StatsService } from '../../services/stats.service';
-import { StandingsService } from '../../services/standings.service';
-
+import { PlayerService } from 'src/app/services/player.service';
+import { TeamService } from 'src/app/services/team.service';
 @Component({
   selector: 'app-player-stats',
   templateUrl: './player-stats.component.html',
@@ -14,53 +14,83 @@ import { StandingsService } from '../../services/standings.service';
 export class PlayerStatsComponent implements OnInit, OnDestroy {
   // declare class properties
   availableSeasons: Array<any>;
-  availableTeams: Array<any>;
-  player: Player;
-  players: Player[] = [];
   currentSeason : String;
   selectedSeason : String;
+  availableTeams: Array<any>;
   selectedTeam : String;
+  filteredTeams : Array<any>;
+  player: Player;
+  players: Player[] = [];
+  filteredPlayers: Player[];
   selectedPlayer : String;
-  showSeasonsTable: Boolean;
+  showTable: Boolean;
   // declare class subscriptions
   private playersSub: Subscription;
   // Inject Services
   constructor(
     public StatsService : StatsService,
-    public StandingsService : StandingsService
+    public TeamService : TeamService,
+    public PlayerService : PlayerService
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     // class property defaults
-    this.selectedSeason = this.StatsService.getSeason();
+    this.currentSeason = this.TeamService.getCurrentSeason();
+    this.selectedSeason = this.currentSeason;
     this.selectedTeam = "All";
     this.selectedPlayer = "All"
-    this.showSeasonsTable = false;
-    // Subscribe to our stats stream
-    this.StatsService.getStats(this.selectedSeason, this.selectedTeam, "All");
-    this.playersSub = this.StatsService.getPlayerStatsUpdateListener()
-      .subscribe((players: Player[]) => {
-        this.players = players;
-      });
+    this.PlayerService.getPlayerStats();
+    this.playersSub = this.PlayerService.getPlayerStatsUpdateListener().subscribe((players: Player[]) => {
+      this.players = players;
+      const clonedArray = [...this.players];
+      const clonedTeamArray = [...this.availableTeams];
+      clonedArray.forEach(player => {
+        var teamObj = clonedTeamArray.find(team => team.stats._id === player.stats.team);
+        var teamName = teamObj.name;
+        player.stats.teamName = teamName;
+      })
+      this.filterPlayers();
+    });
     // get available seasons to select from
     this.StatsService.getAvailableStatSeasons().subscribe((res) => {
-      res.seasons.push("All");
-      this.availableSeasons = res.seasons;
+      res.data.push("All");
+      res.data.push(this.currentSeason);
+      this.availableSeasons = res.data;
     });
-    // get available teams to select from
-    this.StandingsService.get("teams").subscribe((res : any) => {
-      console.log(res.data);
-      if (res.data.length > 0) {
-        res.data.push("All");
-        this.availableTeams = res.data ;
-        console.log(this.availableTeams);
+    // get all teams and filter for this season
+    try {
+      const teams = await this.TeamService.get().toPromise();
+      if (teams.data.length > 0) {
+        let allObj = {_id:"All", name:"All", stats:{ season : "Any", _id:"All"}};
+        teams.data.push(allObj);
+        this.availableTeams = teams.data ;
+        this.filterAvailableTeams();
       }
-    });
+    } catch {
+      this.availableTeams = [];
+    }
+
   };
+
+  filterAvailableTeams() {
+    this.filteredTeams = this.availableTeams.filter(team => team.stats.season == this.selectedSeason || team.name == 'All');
+  }
+  filterPlayers() {
+    if (this.selectedTeam != "All") {
+      this.filteredPlayers = this.players.filter(player => player.stats.season == this.selectedSeason && player.stats.team == this.selectedTeam);
+    } else {
+      this.filteredPlayers = this.players.filter(player => player.stats.season == this.selectedSeason);
+    }
+    console.log(this.filteredPlayers);
+    if (this.filteredPlayers.length > 0) {
+      this.showTable = true;
+    } else {
+      this.showTable = false;
+    }
+  }
   filterPlayer(player) {
     console.log(player);
-    this.showSeasonsTable = true;
-    this.StatsService.getStats("All","All",player.id);
+    this.showTable = true;
   }
   filterSeasons(seasons) {
     console.log(seasons);
@@ -68,14 +98,15 @@ export class PlayerStatsComponent implements OnInit, OnDestroy {
   }
   // Update the subscribed stream when selecting a drop down choice
   getSelectedStats() {
-    this.showSeasonsTable = false;
-    this.StatsService.getStats(this.selectedSeason,this.selectedTeam,"All");
+    this.filterAvailableTeams();
+    this.filterPlayers();
+    //this.showTable = false;
   }
   restoreDefaults() {
-    this.selectedSeason = this.StatsService.getSeason();
     this.selectedPlayer = "All";
     this.selectedTeam = "All";
-    this.StatsService.getStats(this.selectedSeason, this.selectedTeam, "All");
+    this.selectedSeason = this.TeamService.getCurrentSeason();
+    this.PlayerService.getPlayerStats();
   }
   ngOnDestroy() {
     this.playersSub.unsubscribe();

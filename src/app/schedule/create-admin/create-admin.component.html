@@ -1,0 +1,131 @@
+<div class="component-container">
+  <h1>Create Schedule</h1>
+  <div id="roster-season-dds">
+    <div class = "info box">
+      <p>Available Seasons are pulled from Google Drive. If the season you need to create is not in the drop down,
+        you need to create that season in the "Teams" directory and it's corresponding rosters
+        <a class="inline-info-link"
+            href="https://drive.google.com/drive/u/0/folders/1FbQmg22x51J39dhHfDnOKojHRQYck4oD"
+            target="_blank">Google Drive
+        </a>
+      </p>
+    </div>
+    <p>Select a season to create a schedule:</p>
+    <select class= "dropdown"
+      (change)="getGoogleRosters(selectedSeason)"
+      [(ngModel)]="selectedSeason"
+      [disabled]="disableActions">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option [ngValue]="null" disabled selected>Select Season</option>
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'"
+        [value]="season">
+        {{season}}
+      </option>
+    </select>
+    <button (click) = "restoreDefaults()">Reset</button>
+  </div>
+  <div *ngIf="showSeasonUsed" id="season-used" class="two-col-equal">
+    <div>
+      <h2>Season Data Already Exists</h2>
+      <p><i>Please choose another season to create a schedule.</i></p>
+      <p><i>If the selected season is correct, delete existing season data to create a new schedule</i></p>
+    </div>
+    <div>
+      <h2>Delete Existing Season Data?</h2>
+      <button (click) = "deleteSeason()" [disabled]="disableActions">Delete</button>
+      <button (click) = "restoreDefaults()">Reset</button>
+    </div>
+  </div>
+  <div *ngIf="showTeamsFetched" id="teams-fetched" class="two-col-equal">
+    <div id="team-fetch-question">
+      <h2>Selected Season Rosters:</h2>
+      <p>Are these the correct rosters?</p>
+      <button (click) = "confirmTeams()" [disabled]="disableActions">Yes</button>
+      <button (click) = "restoreDefaults()" [disabled]="disableActions">No</button>
+    </div>
+    <div></div>
+    <div *ngFor="let team of teamData" >
+      <h4>{{team.name}}</h4>
+      <table>
+        <tr><th>First</th><th>Last</th><th>Email</th></tr>
+        <tr *ngFor="let player of team.sheet.data"><td>{{player[0]}}</td><td>{{player[1]}}</td><td>{{player[2]}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div *ngIf="showScheduleBuilder" id="schedule-builder">
+    <div>
+      <h3>Select Start Date:</h3>
+      <input type="date"
+        [(ngModel)]="selectedStartDate"
+        (change)="getDatesFromStartDate()"
+        [disabled]="disableActions">
+    </div>
+    <div *ngIf="showSelectWeeksOff">
+      <div>
+        <h3>Select Weeks Off:</h3>
+        <select class= "dropdown" [(ngModel)]="selectedWeekDateOff"
+          (change)="checkRequirements()"
+          [disabled]="disableActions">
+          <option [ngValue]="null" disabled selected>Select Weeks</option>
+          <option
+            *ngFor="let weekDate of weekDates"
+            [value]="weekDate">{{weekDate | date:'EE, MMMM d, y'}}
+          </option>
+        </select>
+        <button (click)="addSelectedWeekOff()" [disabled]="disableActions">Add Week Off</button>
+        <div *ngIf="showWeeksOff" id="weeks-off">
+          <h4>Selected Weeks Off:</h4>
+          <ul>
+            <li *ngFor="let weekDateOff of selectedWeekDatesOff">{{weekDateOff | date:'EE, MMMM d, y'}}
+              <span>
+                <button class="list-button" (click)="removeWeekOff(weekDateOff)" [disabled]="disableActions">Remove</button>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3>Select Amount of Weeks:</h3>
+        <select class= "dropdown" [(ngModel)]="selectedWeekAmount"
+          (change)="checkRequirements()"
+          [disabled]="disableActions">
+          <option [ngValue]="null" disabled selected>Select Weeks</option>
+          <option
+            *ngFor="let week of weeks"
+            [value]="week">{{week}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div *ngIf="showGenerateSchedule">
+      <button (click) ="generateSchedule()" [disabled]="disableActions">Generate Schedule</button>
+    </div>
+  </div>
+  <div *ngIf="showSchedule" id="schedule-summary">
+    <h2>Schedule Summary</h2>
+    <table>
+      <tr><th>Team</th><th>4:00</th><th>6:00</th><th>7:30</th></tr>
+      <tr *ngFor="let team of scheduleSummary"><td>{{team.name}}</td><td>{{team['4:30']}}</td><td>{{team['6:00']}}</td><td>{{team['7:30']}}</td></tr>
+    </table>
+  </div>
+  <div *ngIf="showWaitingMessage" class="info box">
+    <h2 id="progress-message">{{waitingMessage}}</h2>
+  </div>
+  <div *ngIf="showSchedule" id="schedule" class="two-col-equal">
+    <div id="schedule-question">
+      <h2>Proposed Schedule:</h2>
+      <p>Confirm Schedule?</p>
+      <button (click) = "confirmSchedule()" [disabled]="disableActions">Yes</button>
+      <button (click) = "restoreDefaults()" [disabled]="disableActions">No</button>
+    </div>
+    <div></div>
+    <div *ngFor="let week of schedule; let i = index" >
+      <h4>Week {{i+1}}: {{week.date | date:'MMMM d, y'}}</h4>
+      <table>
+        <tr><th>Home</th><th>Away</th><th>Time</th></tr>
+        <tr *ngFor="let game of week"><td>{{game.teamA.name}}</td><td>{{game.teamB.name}}</td><td>{{game.time}}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>

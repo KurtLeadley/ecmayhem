@@ -1,0 +1,19 @@
+<h2>Use these credentials for admin rights:</h2>
+<p>Email: admin@email.com</p>
+<p>Password: pw</p>
+<form (submit) = "onLogin(loginForm)" #loginForm= "ngForm">
+    <div>
+      <label for="email">
+        Email
+      </label>
+      <input ngModel type="email" placeholder="Enter Email" #emailInput="ngModel" required email>
+    </div>
+    <div>
+      <label for="password">
+        Password
+      </label>
+      <input ngModel type="password" name="password"  placeholder="Enter Password" #passwordInput="ngModel" required>
+    </div>
+    <button class="submit-button" type="submit">Login</button>
+</form>
+

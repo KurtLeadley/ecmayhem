@@ -1,0 +1,71 @@
+<div class="component-container">
+  <h1>View Schedule</h1>
+  <div id="season-schedule-dds">
+    <p>Select a season to view a schedule:</p>
+    <select class= "dropdown"
+      (change)="getSeasonSchedule()"
+      [(ngModel)]="selectedSeason">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option [ngValue]="null" disabled selected>Select Season</option>
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'"
+        [value]="season"
+        [selected]="season == currentSeason">
+        {{season}}
+      </option>
+    </select>
+  </div>
+  <div *ngIf = "!seasonScheduleExists">
+    <p>No statistics for selected season</p>
+  </div>
+  <div *ngIf="showSchedule" id="season-schedule">
+    <div *ngFor="let week of seasonSchedule; let i = index" >
+      <h4>Week {{week.week}}: {{week.date | date:'mediumDate'}}</h4>
+      <table>
+        <tr><th>Time</th><th>Home</th><th>Score</th><th>Away</th><th></th></tr>
+        <tr *ngFor="let game of week">
+          <td>{{game.time}}</td>
+          <td>{{game.teamA}}</td>
+          <td>{{game.teamAGoals}} - {{game.teamBGoals}}</td>
+          <td>{{game.teamB}}</td>
+          <td><button (click) = "displayGameStats(game)">Box Score</button></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div id="single-result" *ngIf="showSingleResult">
+    <button (click) = "goBackToSchedule()">Back</button>
+    <h3>Final Score:</h3>
+    <table>
+      <tr><th>Time</th><th colspan="2">Home</th><th colspan="2">Away</th></tr>
+      <tr>
+        <td>{{selectedGame.time}}</td>
+        <td>{{selectedGame.teamA}}</td>
+        <td>{{selectedGame.teamAGoals}}</td>
+        <td>{{selectedGame.teamB}}</td>
+        <td>{{selectedGame.teamBGoals}}</td>
+      </tr>
+    </table>
+    <h3>{{selectedGame.teamA}} Statistics:</h3>
+    <table>
+      <tr><th>Player</th><th>G</th><th>A</th><th>PIM</th></tr>
+      <tr *ngFor="let player of selectedGameBoxScoreTeamA">
+        <td>{{player.firstName}} {{player.lastName}}</td>
+        <td>{{player.goals}}</td>
+        <td>{{player.assists}}</td>
+        <td>{{player.pim}}</td>
+      </tr>
+    </table>
+    <h3>{{selectedGame.teamB}} Statistics:</h3>
+    <table>
+      <tr><th>Player</th><th>G</th><th>A</th><th>PIM</th></tr>
+      <tr *ngFor="let player of selectedGameBoxScoreTeamB">
+        <td>{{player.firstName}} {{player.lastName}}</td>
+        <td>{{player.goals}}</td>
+        <td>{{player.assists}}</td>
+        <td>{{player.pim}}</td>
+      </tr>
+    </table>
+    <button (click) = "goBackToSchedule()">Back</button>
+  </div>
+</div>

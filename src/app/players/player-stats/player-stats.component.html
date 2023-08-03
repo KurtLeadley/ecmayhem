@@ -5,6 +5,7 @@
       (change)="getSelectedStats()"
       [(ngModel)]="selectedSeason">
       <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option [ngValue]="null" disabled selected>Select Season</option>
       <option
         *ngFor="let season of availableSeasons | sort:'desc':'season'  |  slice:1"
         [value]="season"
@@ -16,17 +17,20 @@
       (change)="getSelectedStats()"
       [(ngModel)]="selectedTeam">
       <option
-        *ngFor="let team of availableTeams | sort:'desc':'season'"
-        [value]="team._id"
-        [selected]="team._id == 'All'">
+        *ngFor="let team of filteredTeams | sort:'desc':'season'"
+        [value]="team.stats._id"
+        [selected]="team.stats._id == 'All'">
         {{team.name}}
       </option>
     </select>
     <button (click) = "restoreDefaults()">Reset</button>
   </div>
-  <table multi="true" *ngIf="players.length > 0">
+  <div *ngIf="!showTable">
+    <p>No statistics for selected season</p>
+  </div>
+  <table multi="true" *ngIf="showTable">
     <tr>
-      <th *ngIf= showSeasonsTable>Season</th>
+      <th>Season</th>
       <th>First</th>
       <th>Last</th>
       <th>Number</th>
@@ -37,12 +41,12 @@
       <th>Points</th>
       <th>PIM</th>
     </tr>
-    <tr *ngFor="let player of players" (click)="filterPlayer(player)" >
-      <td *ngIf= showSeasonsTable>{{player.stats.season}}</td>
+    <tr *ngFor="let player of filteredPlayers" (click)="filterPlayer(player)" >
+      <td>{{player.stats.season}}</td>
       <td>{{player.first}}</td>
       <td>{{player.last}}</td>
       <td>{{player.stats.jersey}}</td>
-      <td>{{player.stats.team.name}}</td>
+      <td>{{player.stats.teamName}}</td>
       <td>{{player.stats.position}}</td>
       <td>{{player.stats.goals}}</td>
       <td>{{player.stats.assists}}</td>

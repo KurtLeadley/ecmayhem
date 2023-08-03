@@ -28,6 +28,8 @@
         <th>Pts</th>
         <th>GF</th>
         <th>GA</th>
+        <th>SF</th>
+        <th>SA</th>
         <th>+/-</th>
       </tr>
       <tr *ngFor="let team of teams">
@@ -39,6 +41,8 @@
         <td>{{team.stats.pts}}</td>
         <td>{{team.stats.gf}}</td>
         <td>{{team.stats.ga}}</td>
+        <td>{{team.stats.sf}}</td>
+        <td>{{team.stats.sa}}</td>
         <td>{{team.stats.gd}}</td>
       </tr>
     </table>

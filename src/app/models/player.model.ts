@@ -1,18 +1,18 @@
 interface Stats {
-  season : string;
-  team: string;
-  position: string
-  goals: number;
-  assists: number;
-  pim: number;
-  jersey: number;
+  season? : string;
+  team?: string;
+  position?: string
+  goals?: number;
+  assists?: number;
+  pim?: number;
+  jersey?: number;
 }
 export interface Player {
   id: string;
-  first: string;
-  last: string;
+  first?: string;
+  last?: string;
   email: string;
-  stats: {
+  stats?: {
     [key: string] : Stats
   };
 }

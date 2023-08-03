@@ -8,6 +8,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatExpansionModule} from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -26,6 +27,10 @@ import { ImportPlayersComponent } from './players/player-admin/import-players/im
 import { EditStatsComponent } from './players/player-admin/edit-stats/edit-stats.component';
 import { ImportStatsComponent } from './players/player-admin/import-stats/import-stats.component';
 import { FooterComponent } from './footer/footer.component';
+import { ResultsAdminComponent } from './schedule/results-admin/results-admin.component';
+import { CreateAdminComponent } from './schedule/create-admin/create-admin.component';
+import { ViewScheduleComponent } from './schedule/view-schedule/view-schedule.component';
+import { LoginComponent } from './auth/login/login.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +49,11 @@ import { FooterComponent } from './footer/footer.component';
     EditStatsComponent,
     ImportStatsComponent,
     SearchFilterPipe,
-    FooterComponent
+    FooterComponent,
+    ResultsAdminComponent,
+    CreateAdminComponent,
+    ViewScheduleComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -56,6 +65,7 @@ import { FooterComponent } from './footer/footer.component';
     MatButtonModule,
     MatToolbarModule,
     MatExpansionModule,
+    MatFormFieldModule,
     AppRoutingModule,
     HttpClientModule
   ],

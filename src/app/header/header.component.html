@@ -11,6 +11,16 @@
     </div>
   </div>
   <a routerLink="/standings">Standings</a>
-  <a routerLink="/schedule">Schedule</a>
+  <div class="dropdown">
+    <button class="dropbtn">Schedule
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a routerLink="/schedule/view">View Schedule</a>
+      <a routerLink="/schedule/results-admin">Upload Results</a>
+      <a routerLink="/schedule/create-admin">Create Schedule</a>
+    </div>
+  </div>
+  <a routerLink="/login">Login</a>
   <a href="javascript:void(0);" class="icon" (click)="dropDown()">&#9776;</a>
 </div>

@@ -1,0 +1,79 @@
+<div class="component-container">
+  <h1>Upload Results</h1>
+  <div id="roster-season-dds" *ngIf="showResultsDD">
+    <div class = "info box">
+      <p>Available Season Results are pulled from Google Drive. If the season results you need to upload is not in the drop down,
+        you need to create that season in the "Results" directory and it's corresponding result sheets.
+        <a class="inline-info-link"
+            href="https://drive.google.com/drive/u/0/folders/1hjsabxDQV3H5ZCRLHL6Nbaa74_mX-weD"
+            target="_blank">Google Drive
+        </a>
+      </p>
+    </div>
+    <p>Select a season to upload stats</p>
+    <select class= "dropdown"
+      (change)="getGoogleResultSheets(selectedSeason)"
+      [(ngModel)]="selectedSeason">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option [ngValue]="null" disabled selected>Select Season</option>
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'"
+        [value]="season">
+        {{season}}
+      </option>
+    </select>
+  </div>
+  <div id="results" *ngIf="showResults">
+    <button (click) = "restoreDefaults()">Reset</button>
+    <h2>Results</h2>
+    <div *ngFor="let week of statsArray.data; let i = index" >
+      <h4>{{week.week}}</h4>
+      <table>
+        <tr><th>Time</th><th colspan="2">Team A</th><th colspan="2">Team B</th><th>Stats</th></tr>
+        <tr *ngFor="let game of week.data">
+          <td>{{game.sheetName}}</td>
+          <td>{{game.data[3][10]}}</td>
+          <td>{{game.data[3][11]}}</td>
+          <td>{{game.data[4][11]}}</td>
+          <td>{{game.data[4][10]}}</td>
+          <td><button (click) = "displayGameStats(game,week.week)">View Stats</button></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div id="single-result" *ngIf="showSingleResult">
+    <button (click) = "goBackToResults()">Back</button>
+    <h3>Final Score:</h3>
+    <table>
+      <tr><th>Time</th><th colspan="2">Team A</th><th colspan="2">Team B</th></tr>
+      <tr>
+        <td>{{selectedGame.sheetName}}</td>
+        <td>{{selectedGame.data[3][10]}}</td>
+        <td>{{selectedGame.data[3][11]}}</td>
+        <td>{{selectedGame.data[4][11]}}</td>
+        <td>{{selectedGame.data[4][10]}}</td>
+      </tr>
+    </table>
+    <h3>{{selectedGame.data[3][10]}} Statistics:</h3>
+    <table>
+      <tr><th>Player</th><th>G</th><th>A</th><th>PIM</th></tr>
+      <tr *ngFor="let player of selectedGameBoxScore[0]">
+        <td>{{player[0]}} {{player[1]}}</td>
+        <td>{{player[6]}}</td>
+        <td>{{player[7]}}</td>
+        <td>{{player[8]}}</td>
+      </tr>
+    </table>
+    <h3>{{selectedGame.data[4][10]}} Statistics:</h3>
+    <table>
+      <tr><th>Player</th><th>G</th><th>A</th><th>PIM</th></tr>
+      <tr *ngFor="let player of selectedGameBoxScore[1]">
+        <td>{{player[0]}} {{player[1]}}</td>
+        <td>{{player[6]}}</td>
+        <td>{{player[7]}}</td>
+        <td>{{player[8]}}</td>
+      </tr>
+    </table>
+    <button (click) = "goBackToResults()">Back</button>
+  </div>
+</div>

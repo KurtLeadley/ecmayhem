@@ -1,1 +1,42 @@
-<p>goalie-stats works!</p>
+<div class="component-container">
+  <h1>Goalie Statistics</h1>
+  <div id="player-dds">
+    <select class= "dropdown"
+      (change)="getSelectedStats()"
+      [(ngModel)]="selectedSeason">
+      <!--https://stackoverflow.com/questions/58972166/orderby-pipe-issue-in-angular-8-->
+      <option
+        *ngFor="let season of availableSeasons | sort:'desc':'season'  |  slice:1"
+        [value]="season"
+        [selected]="season == currentSeason">
+        {{season}}
+      </option>
+    </select>
+    <button (click) = "restoreDefaults()">Reset</button>
+  </div>
+  <table multi="true" *ngIf= showSeasonsTable>
+    <tr>
+      <th>Season</th>
+      <th>First</th>
+      <th>Last</th>
+      <th>Number</th>
+      <th>Team</th>
+      <th>Position</th>
+      <th>GA</th>
+      <th>SA</th>
+      <th>SV%</th>
+    </tr>
+    <tr *ngFor="let player of filteredPlayers" (click)="filterPlayer(player)" >
+      <td>{{player.stats.season}}</td>
+      <td>{{player.first}}</td>
+      <td>{{player.last}}</td>
+      <td>{{player.stats.jersey}}</td>
+      <td>{{player.stats.teamName}}</td>
+      <td>{{player.stats.position}}</td>
+      <td>{{player.stats.goalsAgainst}}</td>
+      <td>{{player.stats.shotsFaced}}</td>
+      <td>{{player.savePercentage}}</td>
+    </tr>
+  </table>
+  <p class="info-text mat-body-1" *ngIf= !showSeasonsTable>No Statistics Available</p>
+</div>
